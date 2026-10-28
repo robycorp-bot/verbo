@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const html=fs.readFileSync('dist/index.html','utf8');
+const assets=[...html.matchAll(/(?:href|src)="(\.\/[^\"]+)"/g)].map(x=>x[1]);
+for(const x of assets)if(!fs.existsSync(path.join('dist',x)))throw Error(x);
+const w=JSON.parse(fs.readFileSync('dist/data/words.json'));
+const g=JSON.parse(fs.readFileSync('dist/data/gospels.json'));
+if(w.entries.length!==612||g.books.reduce((n,b)=>n+b.chapters.length,0)!==89)throw Error('Corpus incompleto');
+if(new Set(w.entries.map(e=>e.id)).size!==w.entries.length)throw Error('IDs duplicados');
+for(const e of w.entries)if(!e.text||!e.reference||!e.sourceUrl)throw Error('Trecho incompleto');
+console.log(JSON.stringify({localAssets:assets.length,parts:w.entries.length,chapters:89,speechSpans:w.speechSpanCount,ok:true}));

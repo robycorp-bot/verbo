@@ -1,0 +1,8 @@
+.openai/local/
+node_modules/
+bpm-source/
+*.zip
+por-almeida.usfx.xml
+*.tar.gz
+*.tgz
+__pycache__/

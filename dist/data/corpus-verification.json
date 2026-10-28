@@ -1,0 +1,24 @@
+{
+  "entries": 612,
+  "speechVerses": 2059,
+  "speechSpans": 2290,
+  "sourceSpeechSpans": 2290,
+  "bookCounts": {
+    "Mateus": 171,
+    "Marcos": 114,
+    "Lucas": 159,
+    "João": 132,
+    "Atos": 18,
+    "1 Coríntios": 1,
+    "2 Coríntios": 1,
+    "1 Timóteo": 1,
+    "Apocalipse": 15
+  },
+  "gospelChapters": 89,
+  "gospelVerses": 3779,
+  "sourceArchiveSha256": "16375fb06fff9186a8db06353743fe8075dc77d976cc1629263dbb4497630749",
+  "files": {
+    "words.json": 727696,
+    "gospels.json": 440428
+  }
+}

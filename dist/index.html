@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0c0c0b">
+  <meta name="description" content="Conheça a vida, as palavras e a importância de Jesus Cristo em uma jornada cinematográfica em 3D, fundamentada nas Escrituras.">
+  <title>O Verbo — Uma jornada por Jesus Cristo</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body class="booting">
+  <a class="skip" href="#story-title">Ir para o conteúdo</a>
+  <div id="world" aria-hidden="true"><canvas id="scene"></canvas><div class="world-shade"></div><div class="grain"></div></div>
+  <div id="loader" role="status" aria-live="polite"><div class="load-brand">O VERBO</div><div class="load-caption">A luz resplandece nas trevas.</div><div class="load-track"><span></span></div><span class="load-small">PREPARANDO A JORNADA</span></div>
+  <header class="site-header">
+    <button class="brand" id="home" aria-label="O Verbo — início"><span class="brand-cross">✝</span><span>O VERBO<small>UMA JORNADA PELAS ESCRITURAS</small></span></button>
+    <nav class="header-links" aria-label="Navegação principal"><button id="words-link">As palavras <span>↗</span></button><button id="heavens-link">Os céus <span>↗</span></button></nav>
+    <div class="header-tools"><button class="icon-btn" id="sound" aria-label="Ativar ambiente sonoro" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5ZM16 9l5 6m0-6-5 6"/></svg></button><button class="menu-btn" id="menu-toggle" aria-label="Abrir capítulos" aria-expanded="false"><span>CAPÍTULOS</span><i><b></b><b></b></i></button></div>
+  </header>
+  <main id="experience">
+    <article class="story-content" id="story-content" aria-labelledby="story-title">
+      <div class="eyebrow"><span class="tiny-line"></span><span id="story-kicker">O CAMINHO. A VERDADE. A VIDA.</span></div>
+      <h1 id="story-title" tabindex="-1">Jesus<br><em>Cristo.</em></h1>
+      <p class="story-subtitle" id="story-subtitle">A Palavra que se fez carne.<br>Uma história que continua viva.</p>
+      <div id="chapter-body" class="chapter-body"></div>
+      <div class="story-actions"><button class="primary-btn" id="primary-action"><span>Iniciar a jornada</span><span class="circle-arrow">↗</span></button><button class="text-btn" id="secondary-action">Conhecer suas palavras <span>→</span></button></div>
+      <button class="scripture-link" id="scripture-link"><span id="scripture-quote">“Eu sou o caminho, a verdade e a vida.”</span><small id="scripture-ref">JOÃO 14:6 <span>↗</span></small></button>
+      <div id="angel-controls" hidden><div class="angel-tabs" role="group" aria-label="Representações dos seres celestiais"></div><p id="angel-note"></p></div>
+    </article>
+    <div class="scene-caption"><span class="caption-line"></span><span id="scene-caption">NO PRINCÍPIO ERA O VERBO</span><small id="scene-reference">JOÃO 1:1</small></div>
+    <div id="scene-unavailable" hidden>Representação contemplativa • Seu navegador está exibindo a versão sem WebGL.</div>
+  </main>
+  <footer class="journey-footer"><div class="chapter-number"><strong id="chapter-index">01</strong><span>/ 08</span></div><div class="journey-progress" id="journey-progress" aria-label="Capítulos da jornada"></div><div class="journey-controls"><button id="previous" class="nav-arrow" aria-label="Capítulo anterior">←</button><span id="next-hint">AVANCE NA HISTÓRIA</span><button id="next" class="nav-arrow" aria-label="Próximo capítulo">→</button></div></footer>
+  <div class="bottom-meta"><span>FÉ, HISTÓRIA E CONTEMPLAÇÃO</span><button id="motion" aria-pressed="false">Pausar movimento <span>Ⅱ</span></button><span class="nav-help">USE AS SETAS OU DESLIZE PARA AVANÇAR</span></div>
+  <div id="chapter-menu" class="chapter-menu" hidden><div class="menu-heading"><span class="eyebrow">UMA HISTÓRIA. OITO ENCONTROS.</span><button id="menu-close" class="close-btn" aria-label="Fechar capítulos">×</button></div><div class="menu-list" id="menu-list"></div><div class="menu-foot">“E o Verbo se fez carne e habitou entre nós.” <span>JOÃO 1:14</span></div></div>
+  <dialog id="reader" aria-labelledby="reader-title">
+    <div class="reader-top"><div><span class="eyebrow">O VERBO / BIBLIOTECA</span><h2 id="reader-title">Palavras que permanecem.</h2></div><button class="close-btn" id="reader-close" aria-label="Fechar biblioteca">×</button></div>
+    <nav class="reader-tabs" aria-label="Biblioteca bíblica"><button data-tab="words" class="active">As palavras</button><button data-tab="gospels">Evangelhos completos</button><button data-tab="difficult">Palavras difíceis</button><button data-tab="sources">Sobre as fontes</button></nav>
+    <div class="reader-view" id="reader-view"></div>
+  </dialog>
+  <div class="sr-only" id="chapter-announcement" role="status" aria-live="polite"></div>
+  <script type="module" src="./app.js"></script>
+  <noscript><div class="noscript">O Verbo apresenta a vida e os ensinamentos de Jesus Cristo. Ative o JavaScript para percorrer a jornada 3D e consultar os Evangelhos.</div></noscript>
+</body>
+</html>

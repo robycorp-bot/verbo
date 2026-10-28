@@ -1,0 +1,65 @@
+FONTES E CRITÉRIOS DO TEXTO BÍBLICO
+
+Tradução: Bíblia Portuguesa Mundial (BPM), português brasileiro.
+Editora/distribuidora: eBible.org.
+Condição declarada pela fonte: domínio público (Public Domain).
+Estado editorial declarado: rascunho de tradução ainda em revisão.
+Data da edição informada: 8 de outubro de 2026.
+Arquivos-fonte: 13 de outubro de 2026, conforme aviso do pacote.
+
+Página primária da tradução e declaração de domínio público:
+https://ebible.org/bible/details.php?id=porbrbsl
+
+Texto para leitura na fonte:
+https://ebible.org/porbrbsl/
+
+Arquivo USFM utilizado:
+https://ebible.org/Scriptures/porbrbsl_usfm.zip
+
+SHA-256 do arquivo utilizado:
+16375fb06fff9186a8db06353743fe8075dc77d976cc1629263dbb4497630749
+
+PALAVRAS E ENSINAMENTOS
+
+words.json preserva todos os 2.290 segmentos delimitados pelos marcadores
+editoriais USFM de fala de Jesus (\\wj ... \\wj*) presentes no Novo Testamento
+deste pacote. Os segmentos ocupam 2.059 versículos e foram organizados em
+612 partes por livro, capítulo e tema. Falas interrompidas por narrativa ou
+por outro interlocutor permanecem separadas quando a interrupção é entre
+versículos. Dentro de um versículo, todos os segmentos marcados são unidos
+em sua ordem original.
+
+A seleção acompanha a atribuição editorial da tradução. Inclui também
+palavras citadas ou recordadas por outros interlocutores, por apóstolos e
+nas visões de Atos e Apocalipse. A identidade de algumas vozes e o começo
+ou fim de certas falas são interpretados de maneiras diferentes em outras
+edições. Por exemplo, as palavras destacadas em Apocalipse 1:8 são
+atribuídas no próprio versículo ao Senhor Deus. A inclusão neste arquivo
+segue a marcação da BPM, sem resolver essa questão interpretativa.
+
+Isto não é uma reconstrução de tudo o que Jesus disse em sua vida. Os
+Evangelhos preservam um testemunho selecionado (João 20:30-31; 21:25).
+Notas de variantes e referências cruzadas não fazem parte da extração.
+O vocabulário do texto bíblico não foi reescrito por inteligência artificial.
+Títulos, temas e notas de contexto são organização editorial do site.
+
+EVANGELHOS COMPLETOS
+
+gospels.json contém os 89 capítulos completos de Mateus, Marcos, Lucas e
+João: 3.779 posições de versículo, com toda a narrativa e todas as vozes,
+sem o aparato de notas da fonte. Não é uma seleção exclusiva de falas.
+
+Lucas 17:36 tem somente nota de variante, sem texto principal nesta edição.
+A posição permanece vazia para preservar a numeração. O objeto verseNotes
+documenta a nota correspondente; ela deve ser apresentada como nota
+editorial, e não como texto principal.
+
+VERIFICAÇÃO
+
+O extrator verificou a igualdade entre todos os marcadores da fonte e os
+segmentos entregues; verificou a presença de cada versículo marcado,
+ausência de duplicação, 89 capítulos completos, numeração das posições e
+ausência de marcadores USFM residuais no texto entregue.
+
+As contagens e a impressão digital da fonte também constam em
+corpus-verification.json.
