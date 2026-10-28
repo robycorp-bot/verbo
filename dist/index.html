@@ -7,7 +7,7 @@
   <meta name="description" content="Conheça a vida, as palavras e a importância de Jesus Cristo em uma jornada cinematográfica em 3D, fundamentada nas Escrituras.">
   <title>O Verbo — Uma jornada por Jesus Cristo</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=2">
 </head>
 <body class="booting">
   <a class="skip" href="#story-title">Ir para o conteúdo</a>
@@ -33,14 +33,14 @@
   </main>
   <footer class="journey-footer"><div class="chapter-number"><strong id="chapter-index">01</strong><span>/ 08</span></div><div class="journey-progress" id="journey-progress" aria-label="Capítulos da jornada"></div><div class="journey-controls"><button id="previous" class="nav-arrow" aria-label="Capítulo anterior">←</button><span id="next-hint">AVANCE NA HISTÓRIA</span><button id="next" class="nav-arrow" aria-label="Próximo capítulo">→</button></div></footer>
   <div class="bottom-meta"><span>FÉ, HISTÓRIA E CONTEMPLAÇÃO</span><button id="motion" aria-pressed="false">Pausar movimento <span>Ⅱ</span></button><span class="nav-help">USE AS SETAS OU DESLIZE PARA AVANÇAR</span></div>
-  <div id="chapter-menu" class="chapter-menu" hidden><div class="menu-heading"><span class="eyebrow">UMA HISTÓRIA. OITO ENCONTROS.</span><button id="menu-close" class="close-btn" aria-label="Fechar capítulos">×</button></div><div class="menu-list" id="menu-list"></div><div class="menu-foot">“E o Verbo se fez carne e habitou entre nós.” <span>JOÃO 1:14</span></div></div>
+  <dialog id="chapter-menu" class="chapter-menu" aria-labelledby="menu-title"><div class="menu-heading"><span class="eyebrow" id="menu-title">UMA HISTÓRIA. OITO ENCONTROS.</span><button id="menu-close" class="close-btn" aria-label="Fechar capítulos">×</button></div><div class="menu-list" id="menu-list"></div><div class="menu-foot">“E o Verbo se fez carne e habitou entre nós.” <span>JOÃO 1:14</span></div></dialog>
   <dialog id="reader" aria-labelledby="reader-title">
     <div class="reader-top"><div><span class="eyebrow">O VERBO / BIBLIOTECA</span><h2 id="reader-title">Palavras que permanecem.</h2></div><button class="close-btn" id="reader-close" aria-label="Fechar biblioteca">×</button></div>
-    <nav class="reader-tabs" aria-label="Biblioteca bíblica"><button data-tab="words" class="active">As palavras</button><button data-tab="gospels">Evangelhos completos</button><button data-tab="difficult">Palavras difíceis</button><button data-tab="sources">Sobre as fontes</button></nav>
+    <nav class="reader-tabs" aria-label="Biblioteca bíblica"><button data-tab="story">A história</button><button data-tab="words" class="active">As palavras</button><button data-tab="gospels">Evangelhos completos</button><button data-tab="difficult">Palavras difíceis</button><button data-tab="sources">Sobre as fontes</button></nav>
     <div class="reader-view" id="reader-view"></div>
   </dialog>
   <div class="sr-only" id="chapter-announcement" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="./app.js?v=2"></script>
   <noscript><div class="noscript">O Verbo apresenta a vida e os ensinamentos de Jesus Cristo. Ative o JavaScript para percorrer a jornada 3D e consultar os Evangelhos.</div></noscript>
 </body>
 </html>

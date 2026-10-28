@@ -15,10 +15,9 @@ export async function createScene(canvas) {
   const reducedQuery = matchMedia('(prefers-reduced-motion: reduce)');
   let reduced = reducedQuery.matches, paused = false, activeChapter = 0, time = 0, frame = 0;
   let width = innerWidth, height = innerHeight, pointerX = 0, pointerY = 0;
-  let dirtyUntil = performance.now() + 2400;
   let transition = 1, desiredCameraZ = 11.5, angelType = 'serafins';
   const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias: innerWidth > 700, powerPreference:'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.35 : 1.7));
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, innerWidth <= 700 ? 1.35 : 1.7));
   renderer.setSize(width,height,false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -105,8 +104,8 @@ export async function createScene(canvas) {
   const featherShadow=new THREE.MeshStandardMaterial({color:0x83745a,metalness:.5,roughness:.58,side:THREE.DoubleSide});
   const featherShape=new THREE.Shape();featherShape.moveTo(0,0);featherShape.bezierCurveTo(.3,.15,.95,.17,1.35,0);featherShape.bezierCurveTo(.85,-.09,.3,-.09,0,0);const featherGeo=new THREE.ExtrudeGeometry(featherShape,{depth:.025,bevelEnabled:true,bevelSize:.012,bevelThickness:.009,bevelSegments:1,steps:1,curveSegments:8});
   function wing(side=1,length=1){const group=new THREE.Group();for(let i=0;i<15;i++){const feather=new THREE.Mesh(featherGeo,i%4===0?featherShadow:featherMat);const p=i/14;feather.position.set(.05+p*.52, -.13+p*.42,Math.sin(p*Math.PI)*.07);feather.rotation.z=-.8+p*1.12;feather.rotation.y=.12+p*.12;feather.scale.set((.5+Math.sin(p*Math.PI*.75)*.7)*length,.75+p*.3,1);group.add(feather);}const bones=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),lightGold);bones.scale.set(.8,.13,.11);bones.position.set(.5,.07,-.03);bones.rotation.z=.23;group.add(bones);group.scale.x=side;return group;}
-  const wingAnimations=[];
-  function clearAngel(){while(angel.children.length){const c=angel.children[0];angel.remove(c);}wingAnimations.length=0;}
+  const wingAnimations=[], angelCache=new Map();
+  function clearAngel(){while(angel.children.length){const c=angel.children[0];angel.remove(c);}wingAnimations.length=0;ringAnimations.length=0;}
   function addWing(side,y,angle,length,depth=0){const w=wing(side,length);w.position.set(side*.13,y,depth);w.rotation.z=side*angle;angel.add(w);wingAnimations.push({obj:w,side,base:angle,phase:y*3});return w;}
   function luminousHeart(){const heart=new THREE.Mesh(new THREE.IcosahedronGeometry(.2,2),glowMaterial);heart.scale.y=1.8;heart.position.y=.25;angel.add(heart);const gl=halo.clone();gl.material=haloMaterial.clone();gl.material.uniforms.uOpacity.value=.58;gl.scale.setScalar(.28);gl.position.set(0,.25,-.9);angel.add(gl);}
   function eye(x,y,z,size=.1,parent=angel){const eyeGroup=new THREE.Group();eyeGroup.position.set(x,y,z);const white=new THREE.Mesh(new THREE.SphereGeometry(size,14,10),lightGold);white.scale.set(1.5,.72,.4);eyeGroup.add(white);const pupil=new THREE.Mesh(new THREE.SphereGeometry(size*.4,12,8),new THREE.MeshStandardMaterial({color:0x1b2430,metalness:.4,roughness:.23}));pupil.position.z=size*.36;eyeGroup.add(pupil);parent.add(eyeGroup);return eyeGroup;}
@@ -132,26 +131,54 @@ export async function createScene(canvas) {
     }
     addWing(-1,.35,.25,1.12,-.03);addWing(1,.35,.25,1.12,-.03);addWing(-1,-.1,-.65,.94,-.2);addWing(1,-.1,-.65,.94,-.2);
     for(let f=0;f<4;f++){const face=new THREE.Group();face.position.y=.78;face.rotation.y=f*Math.PI/2;const mask=new THREE.Mesh(new THREE.SphereGeometry(.21,16,12),f===0?lightGold:gold);mask.scale.set(.75,1,.7);mask.position.z=.17;face.add(mask);const nose=new THREE.Mesh(f===3?new THREE.ConeGeometry(.085,.23,4):new THREE.SphereGeometry(.075,12,8),lightGold);nose.position.set(0,f===3?-.03:0,.34);nose.rotation.x=Math.PI/2;if(f===1)nose.scale.set(1.4,.7,.8);face.add(nose);if(f===2){for(const s of [-1,1]){const horn=new THREE.Mesh(new THREE.ConeGeometry(.045,.24,8),gold);horn.position.set(s*.16,.18,.16);horn.rotation.z=-s*.4;face.add(horn);}}angel.add(face);}
-    for(let i=0;i<10;i++){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.055,.07,.8,8),gold);leg.position.set((i%2?1:-1)*.19,-1.5,-.03);if(i<2)angel.add(leg);}
+    for(let i=0;i<2;i++){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.055,.07,.8,8),gold);leg.position.set((i%2?1:-1)*.19,-1.5,-.03);angel.add(leg);}
   }
-  makeAngel(angelType);
+  // Keep one model per description: changing tabs reuses the same GPU resources.
+  function activateAngel(type){
+    const cached=angelCache.get(type);
+    if(cached){clearAngel();cached.children.forEach(child=>angel.add(child));wingAnimations.push(...cached.wings);ringAnimations.push(...cached.rings);}
+    else{makeAngel(type);angelCache.set(type,{children:[...angel.children],wings:[...wingAnimations],rings:[...ringAnimations]});}
+  }
+  activateAngel(angelType);
 
   const paletteColors = palettes.map(p=>({fog:new THREE.Color(p.fog),light:new THREE.Color(p.light),sun:new THREE.Color(p.sun),ground:new THREE.Color(p.ground)}));
   const currentFog=new THREE.Color(palettes[0].fog),currentLight=new THREE.Color(palettes[0].light),currentSun=new THREE.Color(palettes[0].sun),currentGround=new THREE.Color(palettes[0].ground);
   let disposed=false,last=performance.now();
-  function resize(){width=canvas.clientWidth||innerWidth;height=canvas.clientHeight||innerHeight;camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setSize(width,height,false);const mobile=width<=700,seaChapter=activeChapter===2;stage.position.set(mobile?(activeChapter===7?.22:.5):(width/height>1.2?2.8:1.85),mobile&&!seaChapter?1.9:0,0);stage.scale.setScalar(mobile&&!seaChapter?.6:1);dirtyUntil=performance.now()+1800;}
+  let renderedWidth=width,renderedHeight=height;
+  function requestRender(){
+    if(disposed||frame||document.hidden)return;
+    last=performance.now();frame=requestAnimationFrame(animate);
+  }
+  function resize(){
+    width=Math.max(1,canvas.clientWidth||innerWidth);height=Math.max(1,canvas.clientHeight||innerHeight);
+    const mobile=width<=700,seaChapter=activeChapter===2,dpr=Math.min(devicePixelRatio||1,mobile?1.35:1.7);
+    if(renderer.getPixelRatio()!==dpr)renderer.setPixelRatio(dpr);
+    if(width!==renderedWidth||height!==renderedHeight){renderer.setSize(width,height,false);renderedWidth=width;renderedHeight=height;}
+    camera.aspect=width/height;camera.updateProjectionMatrix();
+    stage.position.set(mobile?(activeChapter===7?.22:.5):(width/height>1.2?2.8:1.85),mobile&&!seaChapter?1.9:0,0);stage.scale.setScalar(mobile&&!seaChapter?.6:1);
+    requestRender();
+  }
   resize();
   const onPointer=(e)=>{pointerX=(e.clientX/innerWidth-.5);pointerY=(e.clientY/innerHeight-.5);};
   addEventListener('pointermove',onPointer,{passive:true});addEventListener('resize',resize,{passive:true});
-  function animate(now){if(disposed)return;frame=requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;
-    if((paused || reduced) && now>dirtyUntil)return;
-    if(!paused && !reduced)time+=dt;
-    const smooth=1-Math.exp(-dt*2.2),p=palettes[activeChapter],pc=paletteColors[activeChapter];transition=Math.min(1,transition+dt*.75);
+  const onVisibility=()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else requestRender();};
+  document.addEventListener('visibilitychange',onVisibility);
+  function animate(now){
+    frame=0;if(disposed||document.hidden)return;
+    const dt=Math.min((now-last)/1000,.05);last=now;
+    const motion=!paused&&!reduced;
+    if(motion)time+=dt;
+    const smooth=motion?1-Math.exp(-dt*2.2):1,p=palettes[activeChapter],pc=paletteColors[activeChapter];transition=motion?Math.min(1,transition+dt*.75):1;
     currentFog.lerp(pc.fog,smooth);currentLight.lerp(pc.light,smooth);currentSun.lerp(pc.sun,smooth);currentGround.lerp(pc.ground,smooth);
     scene.fog.color.copy(currentFog);terrainMaterial.color.copy(currentGround);haloMaterial.uniforms.uColor.value.copy(currentSun);beamShader.uniforms.uColor.value.copy(currentLight);key.color.copy(currentLight);rim.color.copy(currentSun);dustMaterial.uniforms.uColor.value.copy(currentLight);
-    const motion=paused||reduced?0:1;
-    camera.position.z=THREE.MathUtils.lerp(camera.position.z,desiredCameraZ+Math.sin(transition*Math.PI)*1.2,smooth*1.4);
-    camera.position.x=THREE.MathUtils.lerp(camera.position.x,pointerX*.16*motion,smooth);camera.position.y=THREE.MathUtils.lerp(camera.position.y,.35-pointerY*.12*motion,smooth);camera.lookAt(0,.15,0);
+    if(!paused){
+      if(reduced)camera.position.set(0,.35,desiredCameraZ);
+      else{
+        camera.position.z=THREE.MathUtils.lerp(camera.position.z,desiredCameraZ+Math.sin(transition*Math.PI)*1.2,smooth*1.4);
+        camera.position.x=THREE.MathUtils.lerp(camera.position.x,pointerX*.16,smooth);camera.position.y=THREE.MathUtils.lerp(camera.position.y,.35-pointerY*.12,smooth);
+      }
+      camera.lookAt(0,.15,0);
+    }
     cross.rotation.y=-.3+Math.sin(time*.14)*.035;cross.rotation.z=.035+Math.sin(time*.11)*.006;
     cross.visible=[0,3,4,6].includes(activeChapter);nativity.visible=activeChapter===1;water.visible=boat.visible=activeChapter===2;tomb.visible=activeChapter===5;angel.visible=activeChapter===7;
     waterTime.value=time;
@@ -164,13 +191,20 @@ export async function createScene(canvas) {
     beamShader.uniforms.uOpacity.value=THREE.MathUtils.lerp(beamShader.uniforms.uOpacity.value,activeChapter===5?.19:activeChapter===7?.15:.075,smooth);
     rim.intensity=THREE.MathUtils.lerp(rim.intensity,24*p.power,smooth);key.intensity=THREE.MathUtils.lerp(key.intensity,2.8*p.power,smooth);
     dustMaterial.uniforms.uTime.value=time;dust.rotation.y=time*.007;renderer.render(scene,camera);
+    if(motion)frame=requestAnimationFrame(animate);
   }
-  frame=requestAnimationFrame(animate);
   return {
-    setChapter(index){activeChapter=Math.max(0,Math.min(7,Number(index)||0));transition=reduced?1:0;desiredCameraZ=activeChapter===7?10.8:activeChapter===5?11.9:11.5;resize();},
-    setAngel(type){if(!['serafins','querubins','rodas','mensageiros'].includes(type))return;angelType=type;makeAngel(type);dirtyUntil=performance.now()+1800;},
-    setReducedMotion(value){reduced=!!value;dirtyUntil=performance.now()+1800;},setPaused(value){paused=!!value;dirtyUntil=performance.now()+1800;},resize,
-    dispose(){disposed=true;cancelAnimationFrame(frame);removeEventListener('resize',resize);removeEventListener('pointermove',onPointer);renderer.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
+    setChapter(index){activeChapter=Math.max(0,Math.min(7,Math.round(Number(index)||0)));transition=paused||reduced?1:0;desiredCameraZ=activeChapter===7?10.8:activeChapter===5?11.9:11.5;resize();},
+    setAngel(type){if(type===angelType||!['serafins','querubins','rodas','mensageiros'].includes(type))return;angelType=type;activateAngel(type);requestRender();},
+    setReducedMotion(value){reduced=!!value;requestRender();},setPaused(value){paused=!!value;requestRender();},resize,
+    dispose(){
+      disposed=true;cancelAnimationFrame(frame);frame=0;
+      removeEventListener('resize',resize);removeEventListener('pointermove',onPointer);document.removeEventListener('visibilitychange',onVisibility);
+      const geometries=new Set(),materials=new Set();
+      const collect=o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));};
+      scene.traverse(collect);angelCache.forEach(model=>model.children.forEach(child=>child.traverse(collect)));
+      geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());woodTexture.dispose();angelCache.clear();renderer.dispose();
+    }
   };
 }
 

@@ -1,5 +1,6 @@
 import {story, angels, namedAngels, difficult, sources, editorialNote} from './data/story.js';
-import {createScene} from './scene.js';
+import {createScene} from './scene.js?v=2';
+import {swipeDirection} from './gesture.js';
 
 const $ = (s, root=document) => root.querySelector(s);
 const $$ = (s, root=document) => [...root.querySelectorAll(s)];
@@ -15,6 +16,8 @@ let soundOn=false, audioContext, masterGain, oscillators=[];
 const motionQuery=matchMedia('(prefers-reduced-motion: reduce)');
 const progress=$('#journey-progress');
 const reader=$('#reader');
+const chapterMenu=$('#chapter-menu');
+const compactQuery=matchMedia('(max-width: 700px)');
 const titles=['Jesus<br><em>Cristo.</em>','O eterno<br>entrou <em>no tempo.</em>','À margem do mar,<br><em>um chamado.</em>','Palavras que<br><em>fazem viver.</em>','O amor foi<br><em>até o fim.</em>','A pedra não teve<br><em>a última palavra.</em>','Uma história<br><em>que continua.</em>','Além<br><em>do visível.</em>'];
 const captions=['NO PRINCÍPIO ERA O VERBO','UMA LUZ SOBRE BELÉM','JUNTO AO MAR DA GALILEIA','ESPÍRITO E VIDA','O AMOR PERMANECE','POR QUE BUSCAM ENTRE OS MORTOS?','ATÉ O FIM DOS TEMPOS','SANTO, SANTO, SANTO'];
 const captionRefs=['JOÃO 1:1','LUCAS 2:1–20','MARCOS 1:16–20','JOÃO 6:63','JOÃO 19:30','LUCAS 24:5–6','MATEUS 28:20','ISAÍAS 6:3'];
@@ -37,23 +40,25 @@ function renderChapter(){
   $('#scene-caption').textContent=captions[chapter];$('#scene-reference').textContent=captionRefs[chapter];
   $('#scripture-quote').textContent=`“${item.scripture}”`;$('#scripture-ref').innerHTML=`${escapeHTML(item.reference.toUpperCase())} <span>↗</span>`;
   $('#primary-action>span').textContent=chapter===0?'Iniciar a jornada':chapter===3?'Explorar as palavras':chapter===7?'Ler as descrições':chapter===6?'Contemplar os céus':chapter===5?'A história continua':'Continuar a jornada';
-  $('#secondary-action').innerHTML=chapter===0?'Conhecer suas palavras <span>→</span>':chapter===7?'Voltar ao princípio <span>↺</span>':'Ler nas Escrituras <span>↗</span>';
+  $('#secondary-action').innerHTML=chapter===0?'Conhecer suas palavras <span>→</span>':chapter===7?'Voltar ao princípio <span>↺</span>':'Ler capítulo completo <span>↗</span>';
   $('#previous').disabled=chapter===0;$('#next').disabled=chapter===7;$('#next-hint').textContent=chapter===7?'O CÉU DECLARA A GLÓRIA':'AVANCE NA HISTÓRIA';
   $$('.progress-step').forEach((b,i)=>{b.classList.toggle('active',i===chapter);b.classList.toggle('visited',i<chapter);i===chapter?b.setAttribute('aria-current','step'):b.removeAttribute('aria-current')});
   $$('.chapter-option').forEach((b,i)=>b.classList.toggle('active',i===chapter));
   $('#angel-controls').hidden=chapter!==7;
   if(chapter===7)chooseAngel(angel);
+  updateProgressAccessibility();
 }
 async function go(index,{immediate=false}={}){
   index=Math.max(0,Math.min(story.length-1,index));
   if((index===chapter&&!immediate)||transitioning)return;
   transitioning=true;
+  $('#experience').setAttribute('aria-busy','true');
   if(!immediate){$('#story-content').classList.add('changing');await wait(motionQuery.matches?0:300)}
   chapter=index;scene?.setChapter(chapter);renderChapter();
   history.replaceState(null,'',`#${story[chapter].id}`);
   $('#chapter-announcement').textContent=`Capítulo ${chapter+1} de 8. ${story[chapter].title}`;
   requestAnimationFrame(()=>$('#story-content').classList.remove('changing'));
-  await wait(motionQuery.matches?0:700);transitioning=false;
+  await wait(motionQuery.matches?0:700);transitioning=false;$('#experience').setAttribute('aria-busy','false');
 }
 function chooseAngel(id){
   angel=id;const a=angels.find(a=>a.id===id)||angels[0];
@@ -61,17 +66,18 @@ function chooseAngel(id){
   $('#angel-note').innerHTML=`${escapeHTML(a.appearance)} <span class="angel-ref">${escapeHTML(a.reference)}.</span> Interpretação artística.`;
   if(chapter===7){$('#story-subtitle').textContent=a.name;$('#chapter-body').innerHTML=`<p>${escapeHTML(a.description)}</p><p>${escapeHTML(a.limitation)}</p>`;$('#scene-caption').textContent=a.eyebrow;$('#scene-reference').textContent=a.reference.toUpperCase();scene?.setAngel(id)}
 }
-function openMenu(){lastFocus=document.activeElement;$('#chapter-menu').hidden=false;$('#menu-toggle').setAttribute('aria-expanded','true');$('#menu-close').focus()}
-function closeMenu(){if($('#chapter-menu').hidden)return;$('#chapter-menu').hidden=true;$('#menu-toggle').setAttribute('aria-expanded','false');lastFocus?.focus()}
+function openMenu(){lastFocus=document.activeElement;chapterMenu.showModal();$('#menu-toggle').setAttribute('aria-expanded','true');updateMotion();$('#menu-close').focus()}
+function closeMenu(){if(chapterMenu.open)chapterMenu.close()}
+chapterMenu.addEventListener('close',()=>{$('#menu-toggle').setAttribute('aria-expanded','false');updateMotion();lastFocus?.focus()});
 $('#menu-toggle').addEventListener('click',openMenu);$('#menu-close').addEventListener('click',closeMenu);
 $('#home').addEventListener('click',()=>go(0));$('#previous').addEventListener('click',()=>go(chapter-1));$('#next').addEventListener('click',()=>go(chapter+1));
 $('#words-link').addEventListener('click',()=>openReader('words'));$('#heavens-link').addEventListener('click',()=>go(7));
 $('#primary-action').addEventListener('click',()=>chapter===3?openReader('words'):chapter===7?openReader('angels'):go(chapter+1));
-$('#secondary-action').addEventListener('click',()=>chapter===0?openReader('words'):chapter===7?go(0):readStoryPassage());
+$('#secondary-action').addEventListener('click',()=>chapter===0?openReader('words'):chapter===7?go(0):openReader('story'));
 $('#scripture-link').addEventListener('click',readStoryPassage);
 document.addEventListener('keydown',e=>{
   if(reader.open)return;
-  if(!$('#chapter-menu').hidden){if(e.key==='Escape')closeMenu();if(e.key==='Tab')trapFocus(e,$('#chapter-menu'));return}
+  if(chapterMenu.open)return;
   if(e.target.matches('input,select,textarea'))return;
   if(['ArrowRight','ArrowDown','PageDown'].includes(e.key)){e.preventDefault();go(chapter+1)}
   if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(chapter-1)}
@@ -79,17 +85,32 @@ document.addEventListener('keydown',e=>{
   if(e.key==='End'){e.preventDefault();go(7)}
 });
 window.addEventListener('wheel',e=>{
-  if(reader.open||!$('#chapter-menu').hidden)return;
+  if(reader.open||chapterMenu.open)return;
   if(Math.abs(e.deltaY)<25||Date.now()-lastWheel<1400)return;
   lastWheel=Date.now();go(chapter+(e.deltaY>0?1:-1));
 },{passive:true});
 let touchStart;
-$('#experience').addEventListener('touchstart',e=>{touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
-$('#experience').addEventListener('touchend',e=>{
-  if(!touchStart)return;const dx=e.changedTouches[0].clientX-touchStart.x,dy=e.changedTouches[0].clientY-touchStart.y;
-  if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy))go(chapter+(dx<0?1:-1));else if(Math.abs(dy)>80)go(chapter+(dy<0?1:-1));touchStart=null;
+$('#experience').addEventListener('touchstart',e=>{
+  touchStart=null;
+  if(e.touches.length!==1||e.target.closest('button,a,input,select,textarea,[role="button"]'))return;
+  touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY,time:e.timeStamp};
 },{passive:true});
-function trapFocus(e,container){const items=$$('button:not(:disabled),a[href],input,select',container).filter(x=>x.offsetParent!==null);if(!items.length)return;const first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}
+$('#experience').addEventListener('touchmove',e=>{if(e.touches.length!==1)touchStart=null},{passive:true});
+$('#experience').addEventListener('touchcancel',()=>{touchStart=null},{passive:true});
+$('#experience').addEventListener('touchend',e=>{
+  const start=touchStart;touchStart=null;
+  if(e.touches.length||e.changedTouches.length!==1||reader.open||chapterMenu.open)return;
+  const direction=swipeDirection(start,{x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY,time:e.timeStamp});
+  if(direction)go(chapter+direction);
+},{passive:true});
+function updateProgressAccessibility(){
+  const compact=compactQuery.matches;
+  progress.setAttribute('role',compact?'progressbar':'group');
+  if(compact){progress.setAttribute('aria-valuemin','1');progress.setAttribute('aria-valuemax','8');progress.setAttribute('aria-valuenow',String(chapter+1));progress.setAttribute('aria-valuetext',`${chapter+1} de 8: ${story[chapter].label}`)}
+  else ['aria-valuemin','aria-valuemax','aria-valuenow','aria-valuetext'].forEach(a=>progress.removeAttribute(a));
+  $$('.progress-step').forEach(b=>{b.disabled=compact;b.tabIndex=compact?-1:0;compact?b.setAttribute('aria-hidden','true'):b.removeAttribute('aria-hidden')});
+}
+compactQuery.addEventListener('change',updateProgressAccessibility);
 
 async function ensureData(){
   if(wordsData&&gospelsData)return;
@@ -100,14 +121,26 @@ async function openReader(tab='words'){
   if(!reader.open){lastFocus=document.activeElement;reader.showModal()}
   scene?.setPaused(true);readerTab=tab;
   $$('.reader-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===readerTab));
-  $('#reader-title').textContent=tab==='gospels'?'Leia. Permaneça. Descubra.':tab==='difficult'?'Palavras que nos desafiam.':tab==='angels'?'Os céus nas Escrituras.':tab==='sources'?'Uma experiência com fundamento.':'Palavras que permanecem.';
+  $(`.reader-tabs [data-tab="${readerTab}"]`)?.scrollIntoView({block:'nearest',inline:'nearest'});
+  $('#reader-title').textContent=tab==='story'?story[chapter].title:tab==='gospels'?'Leia. Permaneça. Descubra.':tab==='difficult'?'Palavras que nos desafiam.':tab==='angels'?'Os céus nas Escrituras.':tab==='sources'?'Uma experiência com fundamento.':'Palavras que permanecem.';
   const view=$('#reader-view');view.scrollTop=0;
-  if(tab==='difficult'){renderDifficult();return}if(tab==='sources'){renderSources();return}if(tab==='angels'){renderAngels();return}
+  syncReaderViewport();
+  if(tab==='story'){renderStory();return}if(tab==='difficult'){renderDifficult();return}if(tab==='sources'){renderSources();return}if(tab==='angels'){renderAngels();return}
   view.innerHTML='<p class="loading-state" role="status">Abrindo as Escrituras…</p>';
   try{await ensureData();if(!reader.open||readerTab!==tab)return;if(tab==='gospels')renderGospels();else renderWords()}
   catch(error){view.innerHTML=`<div class="reader-error">${escapeHTML(error.message)} <button class="reader-small-button" id="retry-data">Tentar novamente</button><p>Você também pode ler a <a href="https://ebible.org/porbrbsl/" target="_blank" rel="noopener noreferrer">Bíblia Portuguesa Mundial na fonte ↗</a>.</p></div>`;$('#retry-data').addEventListener('click',()=>openReader(tab))}
 }
-$('#reader-close').addEventListener('click',()=>reader.close());reader.addEventListener('close',()=>{scene?.setPaused(paused||document.hidden);lastFocus?.focus()});
+$('#reader-close').addEventListener('click',()=>reader.close());reader.addEventListener('close',()=>{updateMotion();lastFocus?.focus()});
+function syncReaderViewport(){
+  if(!reader.open)return;
+  const viewport=window.visualViewport;
+  reader.style.setProperty('--reader-height',`${viewport?.height||innerHeight}px`);
+  reader.style.setProperty('--reader-top',`${viewport?.offsetTop||0}px`);
+  $('.reader-tabs .active')?.scrollIntoView({block:'nearest',inline:'nearest'});
+}
+addEventListener('resize',syncReaderViewport,{passive:true});
+window.visualViewport?.addEventListener('resize',syncReaderViewport,{passive:true});
+window.visualViewport?.addEventListener('scroll',syncReaderViewport,{passive:true});
 reader.addEventListener('click',e=>{if(e.target===reader){const r=reader.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)reader.close()}});
 const angelTab=document.createElement('button');angelTab.dataset.tab='angels';angelTab.textContent='Seres celestiais';$('.reader-tabs').insertBefore(angelTab,$('[data-tab="sources"]'));
 $$('.reader-tabs button').forEach(b=>b.addEventListener('click',()=>openReader(b.dataset.tab)));
@@ -145,8 +178,12 @@ function gospelURL(b,c){const codes={Mateus:'MAT',Marcos:'MRK',Lucas:'LUK','Joã
 async function readStoryPassage(){
   const match=story[chapter].source.match(/(MAT|MRK|LUK|JHN)(\d+)\.htm(?:#V(\d+))?/);
   if(!match){await openReader(chapter===7?'angels':'sources');return}
-  await ensureData().catch(()=>{});if(!gospelsData){openReader('gospels');return}
-  const names={MAT:'Mateus',MRK:'Marcos',LUK:'Lucas',JHN:'João'};gospelBook=gospelsData.books.findIndex(b=>bookName(b)===names[match[1]]);gospelChapter=Number(match[2]);highlightVerse=Number(match[3]||1);openReader('gospels');
+  gospelBook={MAT:0,MRK:1,LUK:2,JHN:3}[match[1]];gospelChapter=Number(match[2]);highlightVerse=Number(match[3]||1);await openReader('gospels');
+}
+function renderStory(){
+  const item=story[chapter];
+  $('#reader-view').innerHTML=`<div class="source-prose"><p class="eyebrow">${escapeHTML(item.kicker)}</p><h3>${escapeHTML(item.subtitle)}</h3>${item.body.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}<p>“${escapeHTML(item.scripture)}”</p><p>${escapeHTML(item.reference)}</p><button class="reader-small-button" id="story-bible">Ler nas Escrituras ↗</button></div>`;
+  $('#story-bible').addEventListener('click',readStoryPassage);
 }
 function renderDifficult(){
   $('#reader-view').innerHTML=`<p class="reader-intro">Algumas palavras consolam. Outras nos obrigam a parar. Os comentários abaixo oferecem contexto e leituras cristãs comuns; há diferenças de interpretação entre tradições. A passagem completa permanece como referência.</p>${difficult.map((d,i)=>`<article class="difficult-entry"><span>${String(i+1).padStart(2,'0')}</span><div><h3>${escapeHTML(d.title)}</h3><blockquote>“${escapeHTML(d.quote)}”</blockquote><small>${escapeHTML(d.reference)}</small><p>${escapeHTML(d.context)}</p><a class="read-context" href="${safeURL(d.source)}" target="_blank" rel="noopener noreferrer">Ler a passagem completa ↗</a></div></article>`).join('')}`;
@@ -165,14 +202,14 @@ async function toggleSound(){
   }catch{$('#sound').setAttribute('aria-label','Áudio indisponível neste navegador')}
 }
 $('#sound').addEventListener('click',toggleSound);
-function updateMotion(){scene?.setPaused(paused||reader.open||document.hidden);$('#motion').setAttribute('aria-pressed',String(paused));$('#motion').innerHTML=paused?'Retomar movimento <span>▷</span>':'Pausar movimento <span>Ⅱ</span>'}
+function updateMotion(){scene?.setPaused(paused||reader.open||chapterMenu.open||document.hidden);$('#motion').setAttribute('aria-pressed',String(paused));$('#motion').innerHTML=paused?'Retomar movimento <span>▷</span>':'Pausar movimento <span>Ⅱ</span>'}
 $('#motion').addEventListener('click',()=>{paused=!paused;updateMotion()});motionQuery.addEventListener('change',e=>scene?.setReducedMotion(e.matches));
 document.addEventListener('visibilitychange',()=>{updateMotion();if(audioContext&&soundOn)masterGain.gain.setTargetAtTime(document.hidden?0:.11,audioContext.currentTime,.5)});
 window.addEventListener('hashchange',()=>{const i=story.findIndex(s=>s.id===location.hash.slice(1));if(i>=0)go(i)});
 
 async function init(){
   const started=performance.now();renderChapter();
-  try{scene=await createScene($('#scene'));scene.setReducedMotion(motionQuery.matches);document.body.dataset.webgl='ready'}catch(error){document.body.dataset.webgl='unavailable';$('#scene-unavailable').hidden=false;console.warn('Representação 3D indisponível:',error)}
+  try{scene=await createScene($('#scene'));scene.setReducedMotion(motionQuery.matches);updateMotion();document.body.dataset.webgl='ready'}catch(error){document.body.dataset.webgl='unavailable';$('#scene-unavailable').hidden=false;console.warn('Representação 3D indisponível:',error)}
   const initial=story.findIndex(s=>s.id===location.hash.slice(1));if(initial>0){chapter=initial;scene?.setChapter(chapter);renderChapter()}
   await wait(Math.max(0,1400-(performance.now()-started)));$('#loader').classList.add('done');document.body.classList.remove('booting');
   window.__verboReady=true;

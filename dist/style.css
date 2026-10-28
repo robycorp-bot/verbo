@@ -16,3 +16,99 @@ dialog{position:fixed;inset:0;width:min(1180px,94vw);height:90dvh;max-height:90d
 .booting .site-header,.booting #experience,.booting .journey-footer,.booting .bottom-meta{visibility:hidden}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.story-content{will-change:auto}}
 @media(max-height:600px){.site-header{height:70px}#experience{inset:76px 0 107px;align-items:center}.story-content{width:62%;padding-bottom:0}h1{font-size:clamp(57px,12vw,104px);margin:17px 0 12px}.story-subtitle{font-size:19px;line-height:1.15;margin-top:17px}.story-actions{margin-top:17px;gap:14px}.scripture-link{display:none}.chapter-body{font-size:9px;line-height:1.6;margin-top:10px}.chapter-body p+p{display:none}body[data-chapter]:not([data-chapter="0"]) h1{font-size:clamp(38px,6.7vw,65px);margin:14px 0 10px;line-height:.92}body[data-chapter]:not([data-chapter="0"]) .story-subtitle{font-size:17px;margin-top:12px}.journey-footer{bottom:43px}.bottom-meta{bottom:16px}.scene-caption{top:auto;bottom:10px;right:6%}.eyebrow{font-size:6px}.primary-btn{font-size:8px;min-height:37px;padding:7px 8px 7px 13px;gap:12px}.text-btn{font-size:8px}.circle-arrow{width:22px;height:22px}body[data-chapter="7"] .story-content{width:67%;padding-left:7%}body[data-chapter="7"] h1{font-size:39px;margin:12px 0 10px}body[data-chapter="7"] .chapter-body{font-size:8px}body[data-chapter="7"] .chapter-body p+p{display:none}.angel-tabs{padding-top:8px;margin-top:10px}.angel-tabs button{font-size:8px}#angel-note{font-size:7px}.brand small{font-size:5px}}
+
+/* The library sizes its reading area from the actual title and tab heights. */
+:root{--safe-top:env(safe-area-inset-top,0px);--safe-right:env(safe-area-inset-right,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px)}
+#reader[open]{display:flex;flex-direction:column}
+#reader .reader-top,#reader .reader-tabs{flex-shrink:0}
+#reader .reader-view{height:auto;min-height:0;flex:1;overflow:auto}
+#reader .reader-top{padding-top:calc(29px + var(--safe-top));padding-left:max(42px,var(--safe-left));padding-right:max(42px,var(--safe-right))}
+#reader .reader-view{padding-bottom:calc(50px + var(--safe-bottom))}
+.reader-tabs{scrollbar-width:none}
+.reader-tabs::-webkit-scrollbar{display:none}
+dialog.chapter-menu{width:100vw;height:100dvh;max-width:none;max-height:100dvh;margin:0;border:0;padding:calc(6vh + var(--safe-top)) max(8%,var(--safe-right)) calc(6vh + var(--safe-bottom)) max(8%,var(--safe-left))}
+dialog.chapter-menu[open]{display:block}
+
+@media(pointer:coarse),(max-width:700px),(max-height:600px){
+  .icon-btn,.menu-btn,.nav-arrow,.close-btn{min-width:44px;min-height:44px}
+  .icon-btn,.nav-arrow,.close-btn{width:44px;height:44px;flex-shrink:0}
+  .menu-btn{justify-content:center}
+  .primary-btn,.text-btn{min-height:44px}
+  #motion{min-height:44px;padding:4px 0}
+  .angel-tabs button{min-width:44px;min-height:44px;padding:6px 5px}
+  .reader-tabs button{min-height:44px}
+}
+
+@media(max-width:700px){
+  #reader{width:100%;max-width:none;height:var(--reader-height,100dvh);max-height:var(--reader-height,100dvh);inset:var(--reader-top,0px) 0 auto;margin:0}
+  .site-header{height:calc(88px + var(--safe-top));padding-top:var(--safe-top);padding-left:max(7%,var(--safe-left));padding-right:max(7%,var(--safe-right))}
+  #experience{top:calc(88px + var(--safe-top));bottom:calc(144px + var(--safe-bottom))}
+  .story-content,body[data-chapter="7"] .story-content{width:100%;padding-left:max(8%,var(--safe-left));padding-right:max(8%,var(--safe-right))}
+  .chapter-body,body[data-chapter="7"] .chapter-body{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;max-height:4.8em;font-size:12px;line-height:1.6}
+  .chapter-body p,body[data-chapter="7"] .chapter-body p{margin:0}
+  .chapter-body p+p,body[data-chapter="7"] .chapter-body p+p{display:block}
+  .story-actions{gap:12px}
+  .text-btn{max-width:135px;font-size:9px}
+  .angel-tabs{gap:4px;margin-top:12px;padding-top:8px}
+  .angel-tabs button{font-size:9px}
+  #angel-note{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-height:2.9em;font-size:8px;line-height:1.45;margin:8px 0 0}
+  .journey-footer{left:max(8%,var(--safe-left));right:max(8%,var(--safe-right));bottom:calc(62px + var(--safe-bottom));min-height:48px}
+  .bottom-meta{left:max(8%,var(--safe-left));right:max(8%,var(--safe-right));bottom:calc(10px + var(--safe-bottom));min-height:44px}
+  .bottom-meta button{font-size:7px}
+  #reader .reader-top{padding:calc(23px + var(--safe-top)) max(22px,var(--safe-right)) 18px max(22px,var(--safe-left))}
+  #reader .reader-top>div{min-width:0}
+  #reader .reader-top h2{font-size:29px;overflow-wrap:break-word}
+  #reader .reader-view{padding:22px max(22px,var(--safe-right)) calc(40px + var(--safe-bottom)) max(22px,var(--safe-left))}
+  .filters input,.filters select{font-size:16px;min-height:44px;height:44px}
+  .filters label{font-size:9px}
+  .reader-intro{font-size:12px}
+  .reader-tabs button{font-size:11px}
+  .source-prose p,.source-prose li{font-size:14px}
+  .difficult-entry p{font-size:13px}
+  .word-entry .word-context{font-size:12px}
+  dialog.chapter-menu{padding:calc(4vh + var(--safe-top)) max(8%,var(--safe-right)) calc(4vh + var(--safe-bottom)) max(8%,var(--safe-left))}
+}
+
+@media(max-width:700px) and (max-height:600px){
+  .site-header{height:calc(70px + var(--safe-top))}
+  #experience{top:calc(76px + var(--safe-top));bottom:calc(132px + var(--safe-bottom));align-items:center}
+  .story-content,body[data-chapter="7"] .story-content{width:100%;padding-top:0;padding-bottom:0}
+  h1{font-size:64px;line-height:.82;margin:16px 0 12px}
+  body[data-chapter]:not([data-chapter="0"]) h1{font-size:38px;line-height:.94;margin:12px 0 8px}
+  .story-subtitle{font-size:19px;margin-top:15px;line-height:1.2}
+  body[data-chapter]:not([data-chapter="0"]) .story-subtitle{font-size:17px;margin-top:8px;line-height:1.2}
+  .chapter-body,body[data-chapter="7"] .chapter-body{-webkit-line-clamp:2;max-height:3.1em;font-size:11px;line-height:1.55;margin-top:10px}
+  .story-actions,body[data-chapter="7"] .story-actions{margin-top:12px;gap:12px}
+  .primary-btn{font-size:8.5px;gap:10px;padding:7px 8px 7px 12px}
+  .text-btn{font-size:9px}
+  .angel-tabs{margin-top:8px;padding-top:6px}
+  #angel-note{margin-top:6px}
+  .scene-caption{top:8%;bottom:auto}
+}
+
+@media(min-width:701px) and (max-height:460px){
+  .site-header{height:calc(70px + var(--safe-top));padding-top:var(--safe-top);padding-left:max(5%,var(--safe-left));padding-right:max(5%,var(--safe-right))}
+  #experience{top:calc(76px + var(--safe-top));bottom:calc(107px + var(--safe-bottom));align-items:center}
+  .story-content{width:62%}
+  h1{font-size:56px;line-height:.8;margin:8px 0 6px}
+  .story-subtitle{font-size:16px;line-height:1.15;margin-top:8px}
+  body[data-chapter]:not([data-chapter="0"]) h1{font-size:clamp(34px,4.3vw,40px);line-height:.92;margin:8px 0 6px}
+  body[data-chapter]:not([data-chapter="0"]) .story-subtitle{font-size:16px;line-height:1.15;margin-top:8px}
+  .chapter-body{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-height:3em;font-size:10.5px;line-height:1.5;margin-top:8px}
+  .chapter-body p{margin:0}
+  .chapter-body p+p{display:block}
+  .story-actions{margin-top:10px;gap:14px}
+  .text-btn{font-size:9px}
+  .journey-footer{bottom:calc(53px + var(--safe-bottom));min-height:44px}
+  .bottom-meta{bottom:calc(4px + var(--safe-bottom));min-height:44px}
+  .scene-caption{bottom:8px}
+  body[data-chapter="7"] .story-content{width:67%}
+  body[data-chapter="7"]:not([data-chapter="0"]) h1{font-size:27px;line-height:.95;margin:6px 0 4px}
+  body[data-chapter="7"]:not([data-chapter="0"]) .story-subtitle{font-size:16px;margin-top:4px}
+  body[data-chapter="7"] .chapter-body{display:none}
+  body[data-chapter="7"] .story-actions{margin-top:6px}
+  body[data-chapter="7"] .angel-tabs{margin-top:8px;padding-top:6px;gap:8px}
+  body[data-chapter="7"] .angel-tabs button{font-size:9px}
+  body[data-chapter="7"] #angel-note{display:none}
+  .filters input,.filters select{font-size:16px;min-height:44px;height:44px}
+}

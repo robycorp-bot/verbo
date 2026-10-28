@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const html=fs.readFileSync('dist/index.html','utf8');
 const assets=[...html.matchAll(/(?:href|src)="(\.\/[^\"]+)"/g)].map(x=>x[1]);
-for(const x of assets)if(!fs.existsSync(path.join('dist',x)))throw Error(x);
+for(const x of assets)if(!fs.existsSync(path.join('dist',x.split('?')[0])))throw Error(x);
 const w=JSON.parse(fs.readFileSync('dist/data/words.json'));
 const g=JSON.parse(fs.readFileSync('dist/data/gospels.json'));
 if(w.entries.length!==612||g.books.reduce((n,b)=>n+b.chapters.length,0)!==89)throw Error('Corpus incompleto');
